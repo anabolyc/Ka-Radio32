@@ -1,0 +1,20 @@
+{
+    "files.associations": {
+        "interface.h": "c",
+        "sockets.h": "c",
+        "websocket.h": "c",
+        "u8g2.h": "c",
+        "vs1053.h": "c",
+        "dns.h": "c",
+        "audio_player.h": "c",
+        "audio_renderer.h": "c",
+        "common_component.h": "c",
+        "webserver.h": "c",
+        "tcp.h": "c",
+        "telnet.h": "c",
+        "clickbuttons.h": "c",
+        "cencode.h": "c",
+        "libsha1.h": "c",
+        "cstddef": "c"
+    }
+}

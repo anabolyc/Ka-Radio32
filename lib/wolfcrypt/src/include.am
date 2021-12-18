@@ -1,0 +1,148 @@
+# vim:ft=automake
+# All paths should be given relative to the root
+
+nobase_include_HEADERS+= \
+                         aes.h \
+                         arc4.h \
+                         asn.h \
+                         asn_public.h \
+                         poly1305.h \
+                         camellia.h \
+                         cmac.h \
+                         coding.h \
+                         compress.h \
+                         des3.h \
+                         dh.h \
+                         dsa.h \
+                         ecc.h \
+                         curve25519.h \
+                         ed25519.h \
+                         fe_operations.h \
+                         ge_operations.h \
+                         curve448.h \
+                         ed448.h \
+                         fe_448.h \
+                         ge_448.h \
+                         error-crypt.h \
+                         fips_test.h \
+                         hash.h \
+                         hc128.h \
+                         hmac.h \
+                         integer.h \
+                         md2.h \
+                         md4.h \
+                         md5.h \
+                         misc.h \
+                         pkcs7.h \
+                         wc_encrypt.h \
+                         wc_port.h \
+                         pwdbased.h \
+                         rabbit.h \
+                         chacha.h \
+                         chacha20_poly1305.h \
+                         random.h \
+                         ripemd.h \
+                         rsa.h \
+                         rc2.h \
+                         wolfcrypt_settings.h \
+                         sha256.h \
+                         sha512.h \
+                         sha.h \
+                         signature.h \
+                         blake2.h \
+                         blake2-int.h \
+                         blake2-impl.h \
+                         tfm.h \
+                         srp.h \
+                         idea.h \
+                         wolfcrypt_types.h \
+                         visibility.h \
+                         logging.h \
+                         wolfcrypt_memory.h \
+                         mpi_class.h \
+                         mpi_superclass.h \
+                         mem_track.h \
+                         wolfevent.h \
+                         pkcs12.h \
+                         wolfmath.h \
+                         sha3.h \
+                         cpuid.h \
+                         cryptocb.h
+
+noinst_HEADERS+= \
+                         port/pic32/pic32mz-crypt.h \
+                         port/ti/ti-hash.h \
+                         port/ti/ti-ccm.h \
+                         port/nrf51.h \
+                         port/nxp/ksdk_port.h \
+                         port/nxp/dcp_port.h \
+                         port/xilinx/xil-sha3.h \
+                         port/caam/caam_driver.h \
+                         port/caam/wolfcaam.h \
+                         port/caam/wolfcaam_sha.h \
+                         port/silabs/silabs_aes.h \
+                         port/silabs/silabs_ecc.h \
+                         port/silabs/silabs_hash.h \
+                         port/silabs/silabs_random.h \
+                         port/st/stm32.h \
+                         port/st/stsafe.h \
+                         port/Espressif/esp32-crypt.h \
+                         port/arm/cryptoCell.h \
+                         port/Renesas/renesas-tsip-crypt.h \
+                         port/cypress/psoc6_crypto.h
+
+if BUILD_CRYPTOAUTHLIB
+nobase_include_HEADERS+= port/atmel/atmel.h
+endif
+
+if BUILD_AFALG
+nobase_include_HEADERS+= port/af_alg/afalg_hash.h
+nobase_include_HEADERS+= port/af_alg/wc_afalg.h
+endif
+
+if BUILD_DEVCRYPTO
+nobase_include_HEADERS+= port/devcrypto/wc_devcrypto.h
+endif
+
+if BUILD_ASYNCCRYPT
+nobase_include_HEADERS+= async.h
+endif
+
+if BUILD_PKCS11
+nobase_include_HEADERS+= wc_pkcs11.h
+nobase_include_HEADERS+= pkcs11.h
+endif
+
+if BUILD_CAVIUM
+nobase_include_HEADERS+= port/cavium/cavium_nitrox.h
+endif
+
+if BUILD_OCTEON_SYNC
+nobase_include_HEADERS+= port/cavium/cavium_octeon_sync.h
+endif
+
+if BUILD_INTEL_QA
+nobase_include_HEADERS+= port/intel/quickassist.h
+nobase_include_HEADERS+= port/intel/quickassist_mem.h
+endif
+
+if BUILD_INTEL_QA_SYNC
+nobase_include_HEADERS+= port/intel/quickassist_sync.h
+endif
+
+if BUILD_SP
+nobase_include_HEADERS+= sp.h
+nobase_include_HEADERS+= sp_int.h
+endif
+
+if BUILD_SELFTEST
+nobase_include_HEADERS+= selftest.h
+endif
+
+if BUILD_FIPS_V2
+nobase_include_HEADERS+= fips.h
+endif
+
+if BUILD_FIPS_RAND
+nobase_include_HEADERS+= fips.h
+endif
