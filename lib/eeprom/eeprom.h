@@ -89,7 +89,6 @@ struct device_settings {
 	char hostname[HOSTLEN];
 	uint32_t tp_calx;
 	uint32_t tp_caly;
-
 } Device_Settings;
 
 struct shoutcast_info {

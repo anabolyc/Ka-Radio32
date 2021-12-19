@@ -13,6 +13,7 @@
 #define PRIO_SUBSERV	7
 #define PRIO_TIMER		10
 #define PRIO_OTA		8
+#define PRIO_AMP		9
 
 // CPU for task
 #define CPU_MAD			1  // internal decoder and vs1053
@@ -24,5 +25,6 @@
 #define CPU_LCD			0
 #define CPU_SUBSERV		0
 #define CPU_TIMER		0
+#define CPU_AMP         0
 
 #endif

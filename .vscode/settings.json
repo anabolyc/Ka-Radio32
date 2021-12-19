@@ -15,6 +15,12 @@
         "clickbuttons.h": "c",
         "cencode.h": "c",
         "libsha1.h": "c",
-        "cstddef": "c"
+        "cstddef": "c",
+        "clickjoystick.h": "c",
+        "gpio.h": "c",
+        "spi_master.h": "c",
+        "addon.h": "c",
+        "ucg.h": "c",
+        "api.h": "c"
     }
 }

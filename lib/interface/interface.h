@@ -6,8 +6,8 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 #include "esp_log.h"
-#include "telnet.h"
-#include "addon.h"
+#include "../telnet/telnet.h"
+#include "../addon/addon.h"
 
 // need this for ported soft to esp32
 #define ESP32_IDF

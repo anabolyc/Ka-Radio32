@@ -60,6 +60,7 @@ void startSleep(uint32_t delay);
 void stopSleep();
 void startWake(uint32_t delay);
 void stopWake();
+void autoPlay();
 char* getIp();
 
 

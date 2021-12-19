@@ -12,8 +12,8 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
-#include <u8g2.h>
-#include "ucg.h"
+#include "../u8g2/src/u8g2.h"
+#include "../ucglib/src/ucg.h"
 
 
 // lcd_type

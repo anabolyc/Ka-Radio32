@@ -31,11 +31,10 @@ Copyright (C) 2017  KaraWin
 #include "freertos/queue.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
-#include "esp_event_loop.h"
+#include "esp_event.h"
 #include "esp_log.h"
 #include "esp_sleep.h"
 #include "esp_ota_ops.h"
-//#include "esp_heap_trace.h"
 #include "nvs_flash.h"
 #include "driver/i2s.h"
 #include "driver/uart.h"
@@ -53,9 +52,7 @@ Copyright (C) 2017  KaraWin
 
 #include "spiram_fifo.h"
 #include "audio_renderer.h"
-//#include "bt_speaker.h"
 #include "bt_config.h"
-//#include "mdns_task.h"
 #include "audio_player.h"
 #include <u8g2.h>
 #include "u8g2_esp32_hal.h"
@@ -66,25 +63,23 @@ Copyright (C) 2017  KaraWin
 #include "bt_config.h"
 #include "driver/gpio.h"
 #include "driver/i2c.h"
-//#include "esp_wifi.h"
-//#include "xi2c.h"
-//#include "fonts.h"
-//#include "ssd1306.h"
 #include "nvs_flash.h"
 #include "gpio.h"
+#include "wifi.h"
 #include "servers.h"
 #include "webclient.h"
 #include "webserver.h"
 #include "interface.h"
 #include "vs1053.h"
+#include "tas5805m.h"
 #include "ClickEncoder.h"
 #include "addon.h"
 
 /* The event group allows multiple bits for each event*/
 //   are we connected  to the AP with an IP? */
-const int CONNECTED_BIT = 0x00000001;
-//
-const int CONNECTED_AP = 0x00000010;
+// const int CONNECTED_BIT = 0x00000001;
+// //
+// const int CONNECTED_AP = 0x00000010;
 
 #define TAG "main"
 
@@ -94,11 +89,9 @@ const int CONNECTED_AP = 0x00000010;
 #define PRIO_CONNECT configMAX_PRIORITIES - 1
 #define striWATERMARK "watermark: %d  heap: %d"
 
-void start_network();
-void autoPlay();
 /* */
-static bool wifiInitDone = false;
-static EventGroupHandle_t wifi_event_group;
+// static bool wifiInitDone = false;
+// static EventGroupHandle_t wifi_event_group;
 xQueueHandle event_queue;
 
 //xSemaphoreHandle print_mux;
@@ -168,6 +161,7 @@ IRAM_ATTR void sleepCallback(void *pArg)
 	xQueueSendFromISR(event_queue, &evt, NULL);
 	TIMERG0.hw_timer[timer_idx].config.alarm_en = 0;
 }
+
 IRAM_ATTR void wakeCallback(void *pArg)
 {
 
@@ -191,6 +185,7 @@ uint64_t getSleep()
 	ESP_LOGD(TAG, "getSleep: ret: %lld, tot: %lld, return %lld", ret, tot, tot - ret);
 	return ((tot)-ret) / 5000000;
 }
+
 uint64_t getWake()
 {
 	uint64_t ret = 0;
@@ -218,6 +213,7 @@ void stopSleep()
 
 	tsocket("lsleep", 0);
 }
+
 void startSleep(uint32_t delay)
 {
 	ESP_LOGD(TAG, "startSleep: %d min.", delay);
@@ -240,6 +236,7 @@ void stopWake()
 	ESP_ERROR_CHECK(timer_set_alarm_value(TIMERGROUP, wakeTimer, 0x00000000ULL));
 	tsocket("lwake", 0);
 }
+
 void startWake(uint32_t delay)
 {
 	ESP_LOGD(TAG, "startWake: %d min.", delay);
@@ -359,355 +356,368 @@ static void init_hardware()
 }
 
 /* event handler for pre-defined wifi events */
-static esp_err_t event_handler(void *ctx, system_event_t *event)
-{
-	EventGroupHandle_t wifi_event = ctx;
+// static void event_handler(void *arg, esp_event_base_t event_base,
+// 						  int32_t event_id, void *event_data)
+// {
+// 	ESP_LOGD(TAG, "wifi event: event_base=%d, event_id=%d", event_base, event_id);
 
-	switch (event->event_id)
-	{
-	case SYSTEM_EVENT_STA_START:
-		FlashOn = FlashOff = 100;
-		esp_wifi_connect();
-		break;
+// 	EventGroupHandle_t wifi_event = arg;
 
-	case SYSTEM_EVENT_STA_CONNECTED:
-		xEventGroupSetBits(wifi_event, CONNECTED_AP);
-		ESP_LOGI(TAG, "Wifi connected");
-		if (wifiInitDone)
-		{
-			clientSaveOneHeader("Wifi Connected.", 18, METANAME);
-			vTaskDelay(1000);
-			autoPlay();
-		} // retry
-		else
-			wifiInitDone = true;
-		break;
+// 	if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START)
+// 	{
+// 		FlashOn = FlashOff = 100;
+// 		esp_wifi_connect();
+// 	}
+// 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED)
+// 	{
+// 		xEventGroupSetBits(wifi_event, CONNECTED_AP);
+// 		ESP_LOGI(TAG, "Wifi connected");
+// 		if (wifiInitDone)
+// 		{
+// 			clientSaveOneHeader("Wifi Connected.", 18, METANAME);
+// 			vTaskDelay(1000);
+// 			autoPlay();
+// 		} // retry
+// 		else
+// 			wifiInitDone = true;
+// 	}
+// 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED)
+// 	{
+// 		/* This is a workaround as ESP32 WiFi libs don't currently
+//            auto-reassociate. */
+// 		FlashOn = FlashOff = 100;
+// 		xEventGroupClearBits(wifi_event, CONNECTED_AP);
+// 		xEventGroupClearBits(wifi_event, CONNECTED_BIT);
+// 		ESP_LOGE(TAG, "Wifi Disconnected.");
+// 		vTaskDelay(100);
+// 		if (!getAutoWifi() && (wifiInitDone))
+// 		{
+// 			ESP_LOGE(TAG, "reboot");
+// 			vTaskDelay(100);
+// 			esp_restart();
+// 		}
+// 		else
+// 		{
+// 			if (wifiInitDone) // a completed init done
+// 			{
+// 				ESP_LOGE(TAG, "Connection tried again");
+// 				//				clientDisconnect("Wifi Disconnected.");
+// 				clientSilentDisconnect();
+// 				vTaskDelay(100);
+// 				clientSaveOneHeader("Wifi Disconnected.", 18, METANAME);
+// 				vTaskDelay(100);
+// 				while (esp_wifi_connect() == ESP_ERR_WIFI_SSID)
+// 					vTaskDelay(10);
+// 			}
+// 			else
+// 			{
+// 				ESP_LOGE(TAG, "Try next AP");
+// 				vTaskDelay(100);
+// 			} // init failed?
+// 		}
+// 	}
+// 	else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_AP_START)
+// 	{
+// 		FlashOn = 5;
+// 		FlashOff = 395;
+// 		xEventGroupSetBits(wifi_event, CONNECTED_AP);
+// 		xEventGroupSetBits(wifi_event, CONNECTED_BIT);
+// 		wifiInitDone = true;
+// 	}
+// 	else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP)
+// 	{
+// 		FlashOn = 5;
+// 		FlashOff = 395;
+// 		xEventGroupSetBits(wifi_event, CONNECTED_BIT);
+// 	}
+// }
 
-	case SYSTEM_EVENT_STA_GOT_IP:
-		FlashOn = 5;
-		FlashOff = 395;
-		xEventGroupSetBits(wifi_event, CONNECTED_BIT);
-		break;
+// static void unParse(char *str)
+// {
+// 	int i;
+// 	if (str == NULL)
+// 		return;
+// 	for (i = 0; i < strlen(str); i++)
+// 	{
+// 		if (str[i] == '\\')
+// 		{
+// 			str[i] = str[i + 1];
+// 			str[i + 1] = 0;
+// 			if (str[i + 2] != 0)
+// 				strcat(str, str + i + 2);
+// 		}
+// 	}
+// }
 
-	case SYSTEM_EVENT_STA_DISCONNECTED:
-		/* This is a workaround as ESP32 WiFi libs don't currently
-           auto-reassociate. */
-		FlashOn = FlashOff = 100;
-		xEventGroupClearBits(wifi_event, CONNECTED_AP);
-		xEventGroupClearBits(wifi_event, CONNECTED_BIT);
-		ESP_LOGE(TAG, "Wifi Disconnected.");
-		vTaskDelay(100);
-		if (!getAutoWifi() && (wifiInitDone))
-		{
-			ESP_LOGE(TAG, "reboot");
-			vTaskDelay(100);
-			esp_restart();
-		}
-		else
-		{
-			if (wifiInitDone) // a completed init done
-			{
-				ESP_LOGE(TAG, "Connection tried again");
-				//				clientDisconnect("Wifi Disconnected.");
-				clientSilentDisconnect();
-				vTaskDelay(100);
-				clientSaveOneHeader("Wifi Disconnected.", 18, METANAME);
-				vTaskDelay(100);
-				while (esp_wifi_connect() == ESP_ERR_WIFI_SSID)
-					vTaskDelay(10);
-			}
-			else
-			{
-				ESP_LOGE(TAG, "Try next AP");
-				vTaskDelay(100);
-			} // init failed?
-		}
-		break;
+// static void start_wifi()
+// {
+// 	ESP_LOGI(TAG, "starting wifi");
+// 	setAutoWifi();
+// 	//	wifi_mode_t mode;
+// 	char ssid[SSIDLEN];
+// 	char pass[PASSLEN];
 
-	case SYSTEM_EVENT_AP_START:
-		FlashOn = 5;
-		FlashOff = 395;
-		xEventGroupSetBits(wifi_event, CONNECTED_AP);
-		xEventGroupSetBits(wifi_event, CONNECTED_BIT);
-		wifiInitDone = true;
-		break;
+// 	ESP_ERROR_CHECK(esp_netif_init());
+// 	ESP_ERROR_CHECK(esp_event_loop_create_default());
 
-	case SYSTEM_EVENT_AP_STADISCONNECTED:
-		break;
+// 	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+// 	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
+// 	ESP_ERROR_CHECK(esp_wifi_set_storage(WIFI_STORAGE_RAM));
+// 	// esp_netif_create_default_wifi_sta();
 
-	default:
-		break;
-	}
-	return ESP_OK;
-}
+// 	// tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA); // Don't run a DHCP client
+// 													/* FreeRTOS event group to signal when we are connected & ready to make a request */
+// 	wifi_event_group = xEventGroupCreate();
+// 	ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, wifi_event_group));
+// 	ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, wifi_event_group));
 
-static void unParse(char *str)
-{
-	int i;
-	if (str == NULL)
-		return;
-	for (i = 0; i < strlen(str); i++)
-	{
-		if (str[i] == '\\')
-		{
-			str[i] = str[i + 1];
-			str[i + 1] = 0;
-			if (str[i + 2] != 0)
-				strcat(str, str + i + 2);
-		}
-	}
-}
+// 	if (g_device->current_ap == APMODE)
+// 	{
+// 		if (strlen(g_device->ssid1) != 0)
+// 		{
+// 			g_device->current_ap = STA1;
+// 		}
+// 		else
+// 		{
+// 			if (strlen(g_device->ssid2) != 0)
+// 			{
+// 				g_device->current_ap = STA2;
+// 			}
+// 			else
+// 				g_device->current_ap = APMODE;
+// 		}
+// 		saveDeviceSettings(g_device);
+// 	}
 
-static void start_wifi()
-{
-	ESP_LOGI(TAG, "starting wifi");
-	setAutoWifi();
-	//	wifi_mode_t mode;
-	char ssid[SSIDLEN];
-	char pass[PASSLEN];
+// 	while (1)
+// 	{
+// 		// ESP_ERROR_CHECK(esp_wifi_stop());
+// 		// vTaskDelay(10);
 
-	wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
-	ESP_ERROR_CHECK(esp_wifi_init(&cfg));
-	//    ESP_ERROR_CHECK( esp_wifi_set_storage(WIFI_STORAGE_RAM) );
+// 		switch (g_device->current_ap)
+// 		{
+// 		case STA1: //ssid1 used
+// 			strcpy(ssid, g_device->ssid1);
+// 			strcpy(pass, g_device->pass1);
+// 			esp_wifi_set_mode(WIFI_MODE_STA);
+// 			break;
+// 		case STA2: //ssid2 used
+// 			strcpy(ssid, g_device->ssid2);
+// 			strcpy(pass, g_device->pass2);
+// 			esp_wifi_set_mode(WIFI_MODE_STA);
+// 			break;
 
-	tcpip_adapter_init();
-	tcpip_adapter_dhcpc_stop(TCPIP_ADAPTER_IF_STA); // Don't run a DHCP client
-													/* FreeRTOS event group to signal when we are connected & ready to make a request */
-	wifi_event_group = xEventGroupCreate();
-	ESP_ERROR_CHECK(esp_event_loop_init(event_handler, wifi_event_group));
+// 		default: // other: AP mode
+// 			g_device->current_ap = APMODE;
+// 			ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
+// 		}
 
-	if (g_device->current_ap == APMODE)
-	{
-		if (strlen(g_device->ssid1) != 0)
-		{
-			g_device->current_ap = STA1;
-		}
-		else
-		{
-			if (strlen(g_device->ssid2) != 0)
-			{
-				g_device->current_ap = STA2;
-			}
-			else
-				g_device->current_ap = APMODE;
-		}
-		saveDeviceSettings(g_device);
-	}
+// 		if (g_device->current_ap == APMODE)
+// 		{
+// 			ESP_LOGI(TAG, "WIFI GO TO AP MODE");
+// 			wifi_config_t ap_config = {
+// 				.ap = {
+// 					.ssid = "WifiKaradio",
+// 					.authmode = WIFI_AUTH_OPEN,
+// 					.max_connection = 2,
+// 					.beacon_interval = 200},
+// 			};
+// 			ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap_config));
+// 			ESP_LOGE(TAG, "The default AP is  WifiKaRadio. Connect your wifi to it.\nThen connect a webbrowser to 192.168.4.1 and go to Setting\nMay be long to load the first time. Be patient.");
 
-	while (1)
-	{
-		ESP_ERROR_CHECK(esp_wifi_stop());
-		vTaskDelay(10);
+// 			vTaskDelay(1);
+// 			ESP_ERROR_CHECK(esp_wifi_start());
 
-		switch (g_device->current_ap)
-		{
-		case STA1: //ssid1 used
-			strcpy(ssid, g_device->ssid1);
-			strcpy(pass, g_device->pass1);
-			esp_wifi_set_mode(WIFI_MODE_STA);
-			break;
-		case STA2: //ssid2 used
-			strcpy(ssid, g_device->ssid2);
-			strcpy(pass, g_device->pass2);
-			esp_wifi_set_mode(WIFI_MODE_STA);
-			break;
+// 			//			audio_output_mode = I2S;
+// 			option_get_audio_output(&audio_output_mode);
+// 		}
+// 		else
+// 		{
+// 			ESP_LOGI(TAG, "WIFI TRYING TO CONNECT TO SSID %d\n", g_device->current_ap);
+// 			wifi_config_t wifi_config = {
+// 				.sta = {
+// 					.bssid_set = 0,
+// 					.scan_method = WIFI_ALL_CHANNEL_SCAN,
+// 					.sort_method = WIFI_CONNECT_AP_BY_SIGNAL,
+// 				},
+// 			};
+// 			strcpy((char *)wifi_config.sta.ssid, ssid);
+// 			strcpy((char *)wifi_config.sta.password, pass);
+// 			unParse((char *)(wifi_config.sta.ssid));
+// 			unParse((char *)(wifi_config.sta.password));
 
-		default: // other: AP mode
-			g_device->current_ap = APMODE;
-			ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_AP));
-		}
+// 			if (strlen(ssid) /*&&strlen(pass)*/)
+// 			{
+// 				// esp_wifi_disconnect();
+// 				ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
+// 				//				ESP_LOGI(TAG, "connecting %s, %d, %s, %d",ssid,strlen((char*)(wifi_config.sta.ssid)),pass,strlen((char*)(wifi_config.sta.password)));
+// 				ESP_LOGI(TAG, "Connecting %s", ssid);
+// 				ESP_ERROR_CHECK(esp_wifi_start());
+// 			}
+// 			else
+// 			{
+// 				ESP_LOGW(TAG, "AP=%d, SSID is empty, switching to next one", g_device->current_ap);
+// 				g_device->current_ap++;
+// 				g_device->current_ap %= 3;
 
-		if (g_device->current_ap == APMODE)
-		{
-			printf("WIFI GO TO AP MODE\n");
-			wifi_config_t ap_config = {
-				.ap = {
-					.ssid = "WifiKaradio",
-					.authmode = WIFI_AUTH_OPEN,
-					.max_connection = 2,
-					.beacon_interval = 200},
-			};
-			ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &ap_config));
-			ESP_LOGE(TAG, "The default AP is  WifiKaRadio. Connect your wifi to it.\nThen connect a webbrowser to 192.168.4.1 and go to Setting\nMay be long to load the first time.Be patient.");
+// 				if (getAutoWifi() && (g_device->current_ap == APMODE))
+// 				{
+// 					if (fgetc(stdin) == 0xFF)		 // if a char read, stop the autowifi
+// 						g_device->current_ap = STA1; // if autoWifi then wait for a reconnection to an AP
+// 					ESP_LOGI(TAG, "Wait for the AP");
+// 				}
+// 				else
+// 					ESP_LOGI(TAG, "Empty AP. Try next one");
 
-			vTaskDelay(1);
-			ESP_ERROR_CHECK(esp_wifi_start());
+// 				saveDeviceSettings(g_device);
+// 				continue;
+// 			}
+// 		}
 
-			//			audio_output_mode = I2S;
-			option_get_audio_output(&audio_output_mode);
-		}
-		else
-		{
-			printf("WIFI TRYING TO CONNECT TO SSID %d\n", g_device->current_ap);
-			wifi_config_t wifi_config = {
-				.sta = {
-					.bssid_set = 0,
-					.scan_method = WIFI_ALL_CHANNEL_SCAN,
-					.sort_method = WIFI_CONNECT_AP_BY_SIGNAL,
-				},
-			};
-			strcpy((char *)wifi_config.sta.ssid, ssid);
-			strcpy((char *)wifi_config.sta.password, pass);
-			unParse((char *)(wifi_config.sta.ssid));
-			unParse((char *)(wifi_config.sta.password));
-			if (strlen(ssid) /*&&strlen(pass)*/)
-			{
-				esp_wifi_disconnect();
-				ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_STA, &wifi_config));
-				//				ESP_LOGI(TAG, "connecting %s, %d, %s, %d",ssid,strlen((char*)(wifi_config.sta.ssid)),pass,strlen((char*)(wifi_config.sta.password)));
-				ESP_LOGI(TAG, "connecting %s", ssid);
-				ESP_ERROR_CHECK(esp_wifi_start());
-			}
-			else
-			{
-				g_device->current_ap++;
-				g_device->current_ap %= 3;
+// 		/* Wait for the callback to set the CONNECTED_BIT in the event group. */
+// 		if ((xEventGroupWaitBits(wifi_event_group, CONNECTED_AP, false, true, 1500) & CONNECTED_AP) == 0)
+// 		//timeout. Try the next AP
+// 		{
+// 			ESP_LOGW(TAG, "Connect in AP=%d mode timed out, switching to next one", g_device->current_ap);
+// 			g_device->current_ap++;
+// 			g_device->current_ap %= 3;
+// 			if (getAutoWifi() && (g_device->current_ap == APMODE))
+// 			{
+// 				char inp = fgetc(stdin);
+// 				ESP_LOGI(TAG, "fgetc : %x\n", inp);
+// 				if (inp == 0xFF)				 //
+// 					g_device->current_ap = STA1; //if a char read, stop the autowifi
+// 			}
+// 			saveDeviceSettings(g_device);
+// 			ESP_LOGI(TAG, "device->current_ap: %d", g_device->current_ap);
+// 		}
+// 		else
+// 			break; //
+// 	}
+// }
 
-				if (getAutoWifi() && (g_device->current_ap == APMODE))
-				{
-					if (fgetc(stdin) == 0xFF)		 // if a char read, stop the autowifi
-						g_device->current_ap = STA1; // if autoWifi then wait for a reconnection to an AP
-					ESP_LOGI(TAG, "Wait for the AP");
-				}
-				else
-					ESP_LOGI(TAG, "Empty AP. Try next one");
+// void start_network()
+// {
+// 	ESP_LOGI(TAG, "starting network");
+// 	//	struct device_settings *g_device;
+// 	tcpip_adapter_ip_info_t info;
+// 	wifi_mode_t mode;
+// 	ip4_addr_t ipAddr;
+// 	ip4_addr_t mask;
+// 	ip4_addr_t gate;
+// 	uint8_t dhcpEn = 0;
 
-				saveDeviceSettings(g_device);
-				continue;
-			}
-		}
+// 	switch (g_device->current_ap)
+// 	{
+// 	case STA1: //ssid1 used
+// 		IP4_ADDR(&ipAddr, g_device->ipAddr1[0], g_device->ipAddr1[1], g_device->ipAddr1[2], g_device->ipAddr1[3]);
+// 		IP4_ADDR(&gate, g_device->gate1[0], g_device->gate1[1], g_device->gate1[2], g_device->gate1[3]);
+// 		IP4_ADDR(&mask, g_device->mask1[0], g_device->mask1[1], g_device->mask1[2], g_device->mask1[3]);
+// 		dhcpEn = g_device->dhcpEn1;
+// 		break;
+// 	case STA2: //ssid2 used
+// 		IP4_ADDR(&ipAddr, g_device->ipAddr2[0], g_device->ipAddr2[1], g_device->ipAddr2[2], g_device->ipAddr2[3]);
+// 		IP4_ADDR(&gate, g_device->gate2[0], g_device->gate2[1], g_device->gate2[2], g_device->gate2[3]);
+// 		IP4_ADDR(&mask, g_device->mask2[0], g_device->mask2[1], g_device->mask2[2], g_device->mask2[3]);
+// 		dhcpEn = g_device->dhcpEn2;
+// 		break;
 
-		/* Wait for the callback to set the CONNECTED_BIT in the event group. */
-		if ((xEventGroupWaitBits(wifi_event_group, CONNECTED_AP, false, true, 1500) & CONNECTED_AP) == 0)
-		//timeout . Try the next AP
-		{
-			g_device->current_ap++;
-			g_device->current_ap %= 3;
-			if (getAutoWifi() && (g_device->current_ap == APMODE))
-			{
-				char inp = fgetc(stdin);
-				printf("\nfgetc : %x\n", inp);
-				if (inp == 0xFF)				 //
-					g_device->current_ap = STA1; //if a char read, stop the autowifi
-			}
-			saveDeviceSettings(g_device);
-			ESP_LOGI(TAG, "device->current_ap: %d", g_device->current_ap);
-		}
-		else
-			break; //
-	}
-}
+// 	default: // other: AP mode
+// 		IP4_ADDR(&ipAddr, 192, 168, 4, 1);
+// 		memcpy(&gate, &ipAddr, sizeof(gate));
+// 		IP4_ADDR(&mask, 255, 255, 255, 0);
+// 	}
 
-void start_network()
-{
-	//	struct device_settings *g_device;
-	tcpip_adapter_ip_info_t info;
-	wifi_mode_t mode;
-	ip4_addr_t ipAddr;
-	ip4_addr_t mask;
-	ip4_addr_t gate;
-	uint8_t dhcpEn = 0;
+// 	memcpy(&info.ip, &ipAddr, sizeof(info.ip));
+// 	memcpy(&info.gw, &gate, sizeof(info.gw));
+// 	memcpy(&info.netmask, &mask, sizeof(info.netmask));
 
-	switch (g_device->current_ap)
-	{
-	case STA1: //ssid1 used
-		IP4_ADDR(&ipAddr, g_device->ipAddr1[0], g_device->ipAddr1[1], g_device->ipAddr1[2], g_device->ipAddr1[3]);
-		IP4_ADDR(&gate, g_device->gate1[0], g_device->gate1[1], g_device->gate1[2], g_device->gate1[3]);
-		IP4_ADDR(&mask, g_device->mask1[0], g_device->mask1[1], g_device->mask1[2], g_device->mask1[3]);
-		dhcpEn = g_device->dhcpEn1;
-		break;
-	case STA2: //ssid2 used
-		IP4_ADDR(&ipAddr, g_device->ipAddr2[0], g_device->ipAddr2[1], g_device->ipAddr2[2], g_device->ipAddr2[3]);
-		IP4_ADDR(&gate, g_device->gate2[0], g_device->gate2[1], g_device->gate2[2], g_device->gate2[3]);
-		IP4_ADDR(&mask, g_device->mask2[0], g_device->mask2[1], g_device->mask2[2], g_device->mask2[3]);
-		dhcpEn = g_device->dhcpEn2;
-		break;
+// 	ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
+// 	ESP_LOGD(TAG, "wifi mode: %d", mode);
 
-	default: // other: AP mode
-		IP4_ADDR(&ipAddr, 192, 168, 4, 1);
-		memcpy(&gate, &ipAddr, sizeof(gate));
-		IP4_ADDR(&mask, 255, 255, 255, 0);
-	}
+// 	if (mode == WIFI_MODE_AP)
+// 	{
+// 		xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, false, true, 3000);
+// 		memcpy(&info.ip, &ipAddr, sizeof(info.ip));
+// 		tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_AP, &info);
+// 		strcpy(localIp, ip4addr_ntoa(&info.ip));
+// 		ESP_LOGI(TAG, "IP: %s\n\n", ip4addr_ntoa(&info.ip));
+// 	}
+// 	else // mode STA
+// 	{
+// 		if (dhcpEn)
+// 		{ 
+// 			// check if ip is valid without dhcp
+// 			// ESP_LOGD(TAG, "DHCP enabled");
+// 			// tcpip_adapter_dhcpc_start(TCPIP_ADAPTER_IF_STA); //  run a DHCP client
+// 		}
+// 		else
+// 		{
+// 			ESP_LOGD(TAG, "DHCP disabled");
+// 			ESP_ERROR_CHECK(tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &info));
+// 			dns_clear_servers(false);
+// 			IP_SET_TYPE((ip_addr_t *)&info.gw, IPADDR_TYPE_V4); // mandatory
+// 			((ip_addr_t *)&info.gw)->type = IPADDR_TYPE_V4;
+// 			dns_setserver(0, (ip_addr_t *)&info.gw);
+// 			dns_setserver(1, (ip_addr_t *)&info.gw); // if static ip	check dns
+// 		}
 
-	memcpy(&info.ip, &ipAddr, sizeof(info.ip));
-	memcpy(&info.gw, &ipAddr, sizeof(info.gw));
-	memcpy(&info.netmask, &ipAddr, sizeof(info.netmask));
+// 		// wait for ip
+// 		if ((xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, false, true, 3000) & CONNECTED_BIT) == 0) //timeout
+// 		{
+// 			// enable dhcp and restart
+// 			ESP_LOGE(TAG, "Waiting for IP timed out, enabling dhcp and restarting");
+// 			if (g_device->current_ap == 1)
+// 				g_device->dhcpEn1 = 1;
+// 			else
+// 				g_device->dhcpEn2 = 1;
+// 			saveDeviceSettings(g_device);
+// 			esp_restart();
+// 		}
 
-	ESP_ERROR_CHECK(esp_wifi_get_mode(&mode));
-	if (mode == WIFI_MODE_AP)
-	{
-		xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, false, true, 3000);
-		memcpy(&info.ip, &ipAddr, sizeof(info.ip));
-		tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_AP, &info);
-		strcpy(localIp, ip4addr_ntoa(&info.ip));
-		printf("IP: %s\n\n", ip4addr_ntoa(&info.ip));
-	}
-	else // mode STA
-	{
-		if (dhcpEn)											 // check if ip is valid without dhcp
-			tcpip_adapter_dhcpc_start(TCPIP_ADAPTER_IF_STA); //  run a DHCP client
-		else
-		{
-			ESP_ERROR_CHECK(tcpip_adapter_set_ip_info(TCPIP_ADAPTER_IF_STA, &info));
-			dns_clear_servers(false);
-			IP_SET_TYPE((ip_addr_t *)&info.gw, IPADDR_TYPE_V4); // mandatory
-			((ip_addr_t *)&info.gw)->type = IPADDR_TYPE_V4;
-			dns_setserver(0, (ip_addr_t *)&info.gw);
-			dns_setserver(1, (ip_addr_t *)&info.gw); // if static ip	check dns
-		}
+// 		ESP_LOGI(TAG, "Got IP");
+// 		vTaskDelay(1);
 
-		// wait for ip
-		if ((xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT, false, true, 3000) & CONNECTED_BIT) == 0) //timeout
-		{																									// enable dhcp and restart
-			if (g_device->current_ap == 1)
-				g_device->dhcpEn1 = 1;
-			else
-				g_device->dhcpEn2 = 1;
-			saveDeviceSettings(g_device);
-			esp_restart();
-		}
+// 		// retrieve the current ip
+// 		tcpip_adapter_ip_info_t ip_info;
+// 		ip_info.ip.addr = 0;
+// 		while (ip_info.ip.addr == 0)
+// 		{
+// 			if (mode == WIFI_MODE_AP)
+// 				tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_AP, &ip_info);
+// 			else
+// 				tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ip_info);
+// 		}
+// 		ip_addr_t *ipdns0 = (ip_addr_t *)dns_getserver(0);
+// 		//		ip_addr_t ipdns1 = dns_getserver(1);
+// 		ESP_LOGI(TAG, "DNS: %s  \n", ip4addr_ntoa((struct ip4_addr *)ipdns0));
+// 		strcpy(localIp, ip4addr_ntoa(&ip_info.ip));
+// 		ESP_LOGI(TAG, "IP: %s\n\n", ip4addr_ntoa(&ip_info.ip));
 
-		vTaskDelay(1);
-		// retrieve the current ip
-		tcpip_adapter_ip_info_t ip_info;
-		ip_info.ip.addr = 0;
-		while (ip_info.ip.addr == 0)
-		{
-			if (mode == WIFI_MODE_AP)
-				tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_AP, &ip_info);
-			else
-				tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &ip_info);
-		}
-		ip_addr_t *ipdns0 = (ip_addr_t *)dns_getserver(0);
-		//		ip_addr_t ipdns1 = dns_getserver(1);
-		printf("\nDNS: %s  \n", ip4addr_ntoa((struct ip4_addr *)ipdns0));
-		strcpy(localIp, ip4addr_ntoa(&ip_info.ip));
-		printf("IP: %s\n\n", ip4addr_ntoa(&ip_info.ip));
+// 		if (dhcpEn) // if dhcp enabled update fields
+// 		{
+// 			tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &info);
+// 			switch (g_device->current_ap)
+// 			{
+// 			case STA1: //ssid1 used
+// 				memcpy(&g_device->ipAddr1, &info.ip, sizeof(g_device->ipAddr1));
+// 				memcpy(&g_device->mask1, &info.netmask, sizeof(g_device->mask1));
+// 				memcpy(&g_device->gate1, &info.gw, sizeof(g_device->gate1));
+// 				break;
+// 			case STA2: //ssid2 used
+// 				memcpy(&g_device->ipAddr2, &info.ip, sizeof(g_device->ipAddr2));
+// 				memcpy(&g_device->mask2, &info.netmask, sizeof(g_device->mask2));
+// 				memcpy(&g_device->gate2, &info.gw, sizeof(g_device->gate2));
+// 				break;
+// 			}
+// 		}
+// 		saveDeviceSettings(g_device);
+// 		tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, "karadio32");
+// 	}
 
-		if (dhcpEn) // if dhcp enabled update fields
-		{
-			tcpip_adapter_get_ip_info(TCPIP_ADAPTER_IF_STA, &info);
-			switch (g_device->current_ap)
-			{
-			case STA1: //ssid1 used
-				memcpy(&g_device->ipAddr1, &info.ip, sizeof(g_device->ipAddr1));
-				memcpy(&g_device->mask1, &info.netmask, sizeof(g_device->mask1));
-				memcpy(&g_device->gate1, &info.gw, sizeof(g_device->gate1));
-				break;
-			case STA2: //ssid2 used
-				memcpy(&g_device->ipAddr2, &info.ip, sizeof(g_device->ipAddr2));
-				memcpy(&g_device->mask2, &info.netmask, sizeof(g_device->mask2));
-				memcpy(&g_device->gate2, &info.gw, sizeof(g_device->gate2));
-				break;
-			}
-		}
-		saveDeviceSettings(g_device);
-		tcpip_adapter_set_hostname(TCPIP_ADAPTER_IF_STA, "karadio32");
-	}
-
-	lcd_welcome(localIp, "IP found");
-	vTaskDelay(10);
-}
+// 	lcd_welcome(localIp, "IP found");
+// 	vTaskDelay(10);
+// }
 
 //blinking led and timer isr
 void timerTask(void *p)
@@ -781,7 +791,6 @@ void timerTask(void *p)
 		if (isEsplay)				  // esplay board only
 			rexp = i2c_keypad_read(); // read the expansion
 	}
-	//	printf("t0 end\n");
 
 	vTaskDelete(NULL); // stop the task (never reached)
 }
@@ -828,8 +837,6 @@ void uartInterfaceTask(void *pvParameters)
 				if (t == sizeof(tmp) - 1)
 					t = 0;
 			}
-			//else printf("uart d: %d, T= %d\n",d,t);
-			//switchCommand() ;  // hardware panel of command
 		}
 		checkCommand(t, tmp);
 		uxHighWaterMark = uxTaskGetStackHighWaterMark(NULL);
@@ -846,7 +853,7 @@ void uartInterfaceTask(void *pvParameters)
 void autoPlay()
 {
 	char apmode[50];
-	sprintf(apmode, "at IP %s", localIp);
+	ESP_LOGI(TAG, "%s at IP %s", apmode, localIp);
 	if (g_device->current_ap == APMODE)
 	{
 		clientSaveOneHeader("Configure the AP with the web page", 34, METANAME);
@@ -887,8 +894,9 @@ void app_main()
 	ESP_LOGI(TAG, "RAM left: %u", esp_get_free_heap_size());
 
 	const esp_partition_t *running = esp_ota_get_running_partition();
-	ESP_LOGE(TAG, "Running partition type %d subtype %d (offset 0x%08x)",
+	ESP_LOGI(TAG, "Running partition type %d subtype %d (offset 0x%08x)",
 			 running->type, running->subtype, running->address);
+
 	// Initialize NVS.
 	err = nvs_flash_init();
 	if (err == ESP_ERR_NVS_NO_FREE_PAGES)
@@ -904,6 +912,7 @@ void app_main()
 	// Check if we are in large Sram config
 	if (xPortGetFreeHeapSize() > 0x80000)
 		bigRam = true;
+
 	//init hardware
 	partitions_init();
 	ESP_LOGI(TAG, "Partition init done...");
@@ -975,8 +984,6 @@ void app_main()
 
 	init_hardware();
 
-	//ESP_LOGE(TAG,"Corrupt1 %d",heap_caps_check_integrity(MALLOC_CAP_DMA,1));
-
 	// the esplay board needs I2C for gpio extension
 	if (option_get_esplay())
 	{
@@ -1002,6 +1009,41 @@ void app_main()
 
 		//init the amp shutdown gpio4 as output level 1
 		gpio_output_conf(PIN_AUDIO_SHDN);
+	}
+	else
+	{
+		ESP_LOGI(TAG, "Skipping esplay configuration");
+	}
+
+	if (option_get_tas5805m())
+	{
+		gpio_num_t scl;
+		gpio_num_t sda;
+		gpio_num_t rsti2c;
+		gpio_get_i2c(&scl, &sda, &rsti2c);
+		ESP_LOGD(TAG, "I2C GPIO SDA: %d, SCL: %d", sda, scl);
+		i2c_config_t conf;
+		conf.mode = I2C_MODE_MASTER;
+		conf.sda_io_num = sda;
+		conf.sda_pullup_en = GPIO_PULLUP_ENABLE;
+		conf.scl_io_num = scl;
+		conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
+		conf.master.clk_speed = I2C_MASTER_FREQ_HZ;
+		//ESP_ERROR_CHECK
+		(i2c_param_config(I2C_MASTER_NUM, &conf));
+		ESP_LOGD(TAG, "i2c_driver_install %d", I2C_MASTER_NUM);
+		//ESP_ERROR_CHECK
+		(i2c_driver_install(I2C_MASTER_NUM, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0));
+
+		/* init amp */
+		ESP_ERROR_CHECK(tas5806m_init());
+		/* task for the audio amp */
+		xTaskCreatePinnedToCore(&tas5806m_task, "audioamp_task", 8192, NULL, PRIO_AMP, &pxCreatedTask, CPU_AMP);
+		ESP_LOGI(TAG, "%s task: %x", "audioamp_task", (unsigned int)pxCreatedTask);
+	}
+	else
+	{
+		ESP_LOGI(TAG, "Skipping tas5805m configuration");
 	}
 
 	/*	
@@ -1069,14 +1111,15 @@ void app_main()
 	event_queue = xQueueCreate(30, sizeof(queue_event_t));
 	// led blinks
 	xTaskCreatePinnedToCore(timerTask, "timerTask", 2100, NULL, PRIO_TIMER, &pxCreatedTask, CPU_TIMER);
-	ESP_LOGI(TAG, "%s task: %x", "t0", (unsigned int)pxCreatedTask);
+	ESP_LOGD(TAG, "%s task: %x", "t0", (unsigned int)pxCreatedTask);
 
 	//-----------------------------
 	// start the network
 	//-----------------------------
 	/* init wifi & network*/
-	start_wifi();
-	start_network();
+	// start_wifi();
+	// start_network();
+	wifi_init_sta();
 
 	//-----------------------------------------------------
 	//init softwares
@@ -1124,21 +1167,18 @@ void app_main()
 	xTaskCreatePinnedToCore(uartInterfaceTask, "uartInterfaceTask", 2500, NULL, PRIO_UART, &pxCreatedTask, CPU_UART);
 	ESP_LOGI(TAG, "%s task: %x", "uartInterfaceTask", (unsigned int)pxCreatedTask);
 	vTaskDelay(1);
+
 	xTaskCreatePinnedToCore(clientTask, "clientTask", 3800, NULL, PRIO_CLIENT, &pxCreatedTask, CPU_CLIENT);
 	ESP_LOGI(TAG, "%s task: %x", "clientTask", (unsigned int)pxCreatedTask);
 	vTaskDelay(1);
+
 	xTaskCreatePinnedToCore(serversTask, "serversTask", 3100, NULL, PRIO_SERVER, &pxCreatedTask, CPU_SERVER);
 	ESP_LOGI(TAG, "%s task: %x", "serversTask", (unsigned int)pxCreatedTask);
 	vTaskDelay(1);
+
 	xTaskCreatePinnedToCore(task_addon, "task_addon", 2200, NULL, PRIO_ADDON, &pxCreatedTask, CPU_ADDON);
 	ESP_LOGI(TAG, "%s task: %x", "task_addon", (unsigned int)pxCreatedTask);
 
-	/*	if (RDA5807M_detection())
-	{
-		xTaskCreatePinnedToCore(rda5807Task, "rda5807Task", 2500, NULL, 3, &pxCreatedTask,1);  //
-		ESP_LOGI(TAG, "%s task: %x","rda5807Task",(unsigned int)pxCreatedTask);
-	}
-*/
 	vTaskDelay(60); // wait tasks init
 	ESP_LOGI(TAG, " Init Done");
 
