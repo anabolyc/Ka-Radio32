@@ -119,7 +119,7 @@ esp_err_t tas5806m_write_byte(uint8_t register_name, uint8_t value)
 
 esp_err_t tas5806m_init()
 {
-    esp_err_t ret;
+    // esp_err_t ret;
 
     /* audio_ready_mutex */
     audio_ready_mutex = xSemaphoreCreateMutex();

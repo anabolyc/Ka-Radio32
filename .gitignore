@@ -5,3 +5,5 @@ boards/build
 
 .vscode/c_cpp_properties.json
 .vscode/launch.json
+
+sdkconfig.*.old

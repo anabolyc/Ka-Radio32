@@ -1456,36 +1456,29 @@ void clientTask(void *pvParams)
 		strcpy(g_device->ua, "Karadio32/2.0");
 	strcpy(userAgent, g_device->ua);
 	
-	//----------------------------------------------------------------------
-	// TODO: restore this (cause boot loop)	
 	/* Initialize wolfSSL */
-	//	wolfSSL_getLogState()?wolfSSL_Debugging_ON():wolfSSL_Debugging_OFF();
-	// wolfSSL_Debugging_ON();
-
-	// if (wolfSSL_Init() != WOLFSSL_SUCCESS)
-	// {
-	// 	ESP_LOGE(TAG, "Failed to init WOLFSSL");
-	// }
-
-	// /* Create and initialize WOLFSSL_CTX */
-	// if ((ctx = wolfSSL_CTX_new(wolfSSLv23_client_method())) == NULL)
-	// {
-	// 	ESP_LOGE(TAG, "Failed to create WOLFSSL_CTX");
-	// }
-	// wolfSSL_SetLoggingCb(wolfSSL_log_function);
-	// /* Load client certificates into WOLFSSL_CTX */
-	// if ((ret = wolfSSL_CTX_load_verify_buffer(ctx, client_cert_der_1024,
-	// 										  sizeof_client_cert_der_1024, WOLFSSL_FILETYPE_ASN1)) != SSL_SUCCESS)
-	// {
-	// 	ESP_LOGE(TAG, "Failed to load %d, please check the file.", ret);
-	// }
-	// /* not peer check */
-	// wolfSSL_CTX_set_verify(ctx, WOLFSSL_VERIFY_NONE, 0);
-	//----------------------------------------------------------------------
-
-	//	portBASE_TYPE uxHighWaterMark;
-	//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
-	//	printf("watermark webclient:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
+	/* TODO: restore?
+	wolfSSL_Debugging_ON();
+	if (wolfSSL_Init() != WOLFSSL_SUCCESS) {
+		ESP_LOGE(TAG,"Failed to init WOLFSSL");}
+		*/
+	/* Create and initialize WOLFSSL_CTX */
+	if ((ctx = wolfSSL_CTX_new(wolfSSLv23_client_method())) == NULL) {
+		ESP_LOGE(TAG,"Failed to create WOLFSSL_CTX");
+	}
+    wolfSSL_SetLoggingCb(wolfSSL_log_function);	
+	/* Load client certificates into WOLFSSL_CTX */
+	if ((ret = wolfSSL_CTX_load_verify_buffer(ctx, client_cert_der_1024,
+		sizeof_client_cert_der_1024, WOLFSSL_FILETYPE_ASN1)) != SSL_SUCCESS) {
+		ESP_LOGE(TAG,"Failed to load %d, please check the file.",ret);
+	}
+	/* not peer check */
+	wolfSSL_CTX_set_verify(ctx, WOLFSSL_VERIFY_NONE, 0);
+//----------------------------------------------------------------------
+					
+//	portBASE_TYPE uxHighWaterMark;
+//	uxHighWaterMark = uxTaskGetStackHighWaterMark( NULL );
+//	printf("watermark webclient:%d  heap:%d\n",uxHighWaterMark,xPortGetFreeHeapSize( ));
 
 	while (1)
 	{

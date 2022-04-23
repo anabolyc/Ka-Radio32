@@ -23,8 +23,10 @@
 #endif
 
 #define TAG "ucg_hal"
+#define TAG "ucg_hal"
 
 static spi_device_handle_t handle; // SPI handle of the spi lcd interface.
+// static spi_device_handle_t t_handle; // SPI handle of the spi touch interface.XPT2046_Touchscreen ts = XPT2046_Touchscreen();
 // static spi_device_handle_t t_handle; // SPI handle of the spi touch interface.XPT2046_Touchscreen ts = XPT2046_Touchscreen();
 
 DRAM_ATTR static ucg_esp32_hal_t ucg_esp32_hal; // HAL state data.
@@ -58,7 +60,6 @@ void ucg_esp32_hal_init(ucg_esp32_hal_t ucg_esp32_hal_param)
 {
 	ucg_esp32_hal = ucg_esp32_hal_param;
 	oneByte.nb = 0;
-
 } // ucg_esp32_hal_init
 
 void sendOneByte()
@@ -118,11 +119,14 @@ int16_t ucg_com_hal(ucg_t *ucg, int16_t msg, uint16_t arg, uint8_t *data)
 		}
 
 		// init gpio DC and Reset
-		uint64_t bitmask = (uint64_t)0x0;
+		uint64_t bitmask = 0;
+		ESP_LOGW(TAG, "bitmask: %d", bitmask);
 		if (ucg_esp32_hal.dc != UCG_ESP32_HAL_UNDEFINED)
 		{
 			bitmask = bitmask | (1 << ucg_esp32_hal.dc);
 		}
+		ESP_LOGW(TAG, "bitmask: %d", bitmask);
+
 		if (ucg_esp32_hal.reset != UCG_ESP32_HAL_UNDEFINED)
 		{
 			bitmask = bitmask | (1 << ucg_esp32_hal.reset);
