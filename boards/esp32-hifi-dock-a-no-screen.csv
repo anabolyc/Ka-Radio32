@@ -1,14 +1,14 @@
 key,type,encoding,value
 
 label_space,namespace,,
-L_LABEL,data,string,esp32-hifi-amped-dock.csv
-L_COMMENT,data,string,ESP32 HiFi Amped Dock without screen
+L_LABEL,data,string,esp32-hifi-dock-no-screen.csv
+L_COMMENT,data,string,ESP32 HiFi Dock
 
 gpio_space,namespace,,
 K_SPI,data,u8,2
 P_MISO,data,u8,255
 P_MOSI,data,u8,23
-P_CLK,data,u8,18
+P_CLK,data,u8,19
 P_XCS,data,u8,255
 P_RST,data,u8,255
 P_XDCS,data,u8,255
@@ -25,8 +25,8 @@ P_BTN0_C,data,u8,255
 P_BTN1_A,data,u8,255
 P_BTN1_B,data,u8,255
 P_BTN1_C,data,u8,255
-P_I2C_SCL,data,u8,17
-P_I2C_SDA,data,u8,16
+P_I2C_SCL,data,u8,255
+P_I2C_SDA,data,u8,255
 P_I2C_RST,data,u8,255
 P_LCD_CS,data,u8,255
 P_LCD_A0,data,u8,255
@@ -47,7 +47,6 @@ O_LCD_TYPE,data,u8,255
 O_LCD_ROTA,data,u8,0
 O_LCD_OUT,data,u32,0
 O_DDMM_FLAG,data,u8,1
-O_TAS5805M,data,u8,1
 
 custom_ir_space,namespace,,
 K_UP,data,string,0xFE014F 0xFE0150

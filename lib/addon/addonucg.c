@@ -1234,6 +1234,8 @@ void lcd_initUcg(uint8_t *lcd_type)
 	{
 		gpio_get_spi_bus(&spi_no, &miso, &mosi, &sclk);
 		gpio_get_spi_lcd(&cs, &a0, &rstlcd);
+		// ESP_LOGD(TAG, "lcd pinout: sck=%d, mosi=%d, miso=%d, cs=%d, dc=%d, rst=%d",
+		// 	sclk, mosi, miso, cs, a0, rstlcd);
 		ucg_esp32_hal.spi_no = spi_no;
 		ucg_esp32_hal.clk = sclk;
 		ucg_esp32_hal.mosi = mosi;

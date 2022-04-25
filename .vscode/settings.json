@@ -22,5 +22,6 @@
         "addon.h": "c",
         "ucg.h": "c",
         "api.h": "c"
-    }
+    },
+    "idf.adapterTargetName": "esp32"
 }

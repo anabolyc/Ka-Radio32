@@ -1,12 +1,12 @@
 key,type,encoding,value
 
 label_space,namespace,,
-L_LABEL,data,string,esp32-hifi-amped-dock.csv
-L_COMMENT,data,string,ESP32 HiFi Amped Dock without screen
+L_LABEL,data,string,esp32-audio-e-mini.csv
+L_COMMENT,data,string,ESP32 Audio Dev Board Mini rev E
 
 gpio_space,namespace,,
 K_SPI,data,u8,2
-P_MISO,data,u8,255
+P_MISO,data,u8,19
 P_MOSI,data,u8,23
 P_CLK,data,u8,18
 P_XCS,data,u8,255
@@ -25,29 +25,29 @@ P_BTN0_C,data,u8,255
 P_BTN1_A,data,u8,255
 P_BTN1_B,data,u8,255
 P_BTN1_C,data,u8,255
-P_I2C_SCL,data,u8,17
-P_I2C_SDA,data,u8,16
+P_I2C_SCL,data,u8,255
+P_I2C_SDA,data,u8,255
 P_I2C_RST,data,u8,255
-P_LCD_CS,data,u8,255
-P_LCD_A0,data,u8,255
-P_LCD_RST,data,u8,255
-P_IR_SIGNAL,data,u8,35
+P_LCD_CS,data,u8,5
+P_LCD_A0,data,u8,4
+P_LCD_RST,data,u8,32
+P_IR_SIGNAL,data,u8,0
 P_I2S_LRCK,data,u8,25
 P_I2S_BCLK,data,u8,26
 P_I2S_DATA,data,u8,22
-P_ADC,data,u8,255
+P_ADC_KBD,data,u8,255
+P_ADC_BAT,data,u8,34
 P_BACKLIGHT,data,u8,255
 P_TOUCH_CS,data,u8,255
 P_JOY_0,data,u8,255
 P_JOY_1,data,u8,255
-P_LED_GPIO,data,u8,2
+P_LED_GPIO,data,u8,255
 
 option_space,namespace,,
-O_LCD_TYPE,data,u8,255
-O_LCD_ROTA,data,u8,0
+O_LCD_TYPE,data,u8,199
+O_LCD_ROTA,data,u8,2
 O_LCD_OUT,data,u32,0
 O_DDMM_FLAG,data,u8,1
-O_TAS5805M,data,u8,1
 
 custom_ir_space,namespace,,
 K_UP,data,string,0xFE014F 0xFE0150

@@ -202,6 +202,7 @@ static bool nec_rx_init()
 	gpio_get_ir_signal(&ir);
 	if (ir == GPIO_NONE)
 		return false; //no IR needed
+		
 	rmt_config_t rmt_rx;
 	rmt_rx.channel = RMT_RX_CHANNEL;
 	rmt_rx.gpio_num = ir;

@@ -933,7 +933,7 @@ void app_main()
 			g_device->uartspeed = 115200; // default
 										  //			g_device->audio_output_mode = I2S; // default
 			option_get_audio_output(&(g_device->audio_output_mode));
-			g_device->trace_level = ESP_LOG_ERROR; //default
+			g_device->trace_level = ESP_LOG_DEBUG; //default
 			g_device->vol = 100;				   //default
 			g_device->led_gpio = GPIO_NONE;
 			saveDeviceSettings(g_device);
@@ -1070,10 +1070,8 @@ void app_main()
 	audio_output_mode = g_device->audio_output_mode;
 	ESP_LOGI(TAG, "audio_output_mode %d\nOne of I2S=0, I2S_MERUS, DAC_BUILT_IN, PDM, VS1053, SPDIF", audio_output_mode);
 
-	//Initialize the SPI RAM chip communications and see if it actually retains some bytes. If it
-	//doesn't, warn user.
-
-	//	ramInit();
+	//Initialize the SPI RAM chip communications and see if it actually retains some bytes. If it doesn't, warn user.
+	ramInit();
 
 	//uart speed
 	uspeed = g_device->uartspeed;
@@ -1131,14 +1129,14 @@ void app_main()
 	if (err)
 		ESP_LOGE(TAG, "mDNS Init failed: %d", err);
 	else
-		ESP_LOGE(TAG, "mDNS Init ok");
+		ESP_LOGD(TAG, "mDNS Init ok");
 
 	//set hostname and instance name
 	if ((strlen(g_device->hostname) == 0) || (strlen(g_device->hostname) > HOSTLEN))
 	{
 		strcpy(g_device->hostname, "karadio32");
 	}
-	ESP_LOGE(TAG, "mDNS Hostname: %s", g_device->hostname);
+	ESP_LOGI(TAG, "mDNS Hostname: %s", g_device->hostname);
 	err = mdns_hostname_set(g_device->hostname);
 	if (err)
 		ESP_LOGE(TAG, "Hostname Init failed: %d", err);

@@ -103,7 +103,7 @@ bool VS1053_HW_init()
 	if (xcs == GPIO_NONE)
 	{
 		vsVersion = 0; 
-		ESP_LOGE(TAG,"VS1053 not used");
+		ESP_LOGI(TAG,"VS1053 not used");
 		return false;
 	}
 	uint32_t freq =spi_cal_clock(APB_CLK_FREQ, 1400000, 128, NULL);
