@@ -51,7 +51,7 @@ SOFTWARE.
 #include "tas5805m.h"
 
 static SemaphoreHandle_t audio_ready_mutex = NULL;
-static const char TAS5806M_TAG[] = "tas5806m";
+static const char TAS5806M_TAG[] = "tas5805m";
 
 // esp_err_t i2c_master_init()
 // {
@@ -72,7 +72,7 @@ static const char TAS5806M_TAG[] = "tas5806m";
 //     return ret;
 // }
 
-esp_err_t tas5806m_unlock()
+esp_err_t tas5805m_unlock()
 {
     if (audio_ready_mutex == NULL)
         return ESP_OK;
@@ -81,7 +81,7 @@ esp_err_t tas5806m_unlock()
     return ESP_OK;
 }
 
-esp_err_t tas5806m_read(uint8_t register_name, uint8_t *data_rd, size_t size)
+esp_err_t tas5805m_read(uint8_t register_name, uint8_t *data_rd, size_t size)
 {
     if (size == 0)
     {
@@ -102,7 +102,7 @@ esp_err_t tas5806m_read(uint8_t register_name, uint8_t *data_rd, size_t size)
     return ret;
 }
 
-esp_err_t tas5806m_write_byte(uint8_t register_name, uint8_t value)
+esp_err_t tas5805m_write_byte(uint8_t register_name, uint8_t value)
 {
     esp_err_t ret;
     i2c_cmd_handle_t cmd = i2c_cmd_link_create();
@@ -117,9 +117,9 @@ esp_err_t tas5806m_write_byte(uint8_t register_name, uint8_t value)
     return ret;
 }
 
-esp_err_t tas5806m_init()
+esp_err_t tas5805m_init()
 {
-    esp_err_t ret;
+    // esp_err_t ret;
 
     /* audio_ready_mutex */
     audio_ready_mutex = xSemaphoreCreateMutex();
@@ -132,7 +132,10 @@ esp_err_t tas5806m_init()
     io_conf.pull_down_en = 0;
     io_conf.pull_up_en = 0;
     gpio_config(&io_conf);
+    gpio_set_level(TAS5806M_GPIO_PDN, 0);
+    vTaskDelay(20 / portTICK_RATE_MS);
     gpio_set_level(TAS5806M_GPIO_PDN, 1);
+    vTaskDelay(200 / portTICK_RATE_MS);
 
     /* initialize I2C to drive the TAS5806M */
     // ret = i2c_master_init();
@@ -150,7 +153,7 @@ esp_err_t tas5806m_init()
     return ESP_OK;
 }
 
-void tas5806m_task(void *pvParameter)
+void tas5805m_task(void *pvParameter)
 {
 
     for (;;)
@@ -168,11 +171,11 @@ void tas5806m_task(void *pvParameter)
             vTaskDelay(100 / portTICK_RATE_MS);
 
             ESP_LOGI(TAS5806M_TAG, "Setting to HI Z");
-            ESP_ERROR_CHECK(tas5806m_write_byte(0x03, 0x02));
+            ESP_ERROR_CHECK(tas5805m_write_byte(0x03, 0x02));
             vTaskDelay(100 / portTICK_RATE_MS);
 
             ESP_LOGI(TAS5806M_TAG, "Setting to PLAY");
-            ESP_ERROR_CHECK(tas5806m_write_byte(0x03, 0x03));
+            ESP_ERROR_CHECK(tas5805m_write_byte(0x03, 0x03));
 
             vTaskDelay(100 / portTICK_RATE_MS);
 

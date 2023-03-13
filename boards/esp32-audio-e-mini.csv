@@ -35,6 +35,7 @@ P_IR_SIGNAL,data,u8,255
 P_I2S_LRCK,data,u8,25
 P_I2S_BCLK,data,u8,26
 P_I2S_DATA,data,u8,22
+P_I2S_EN,data,u8,255
 P_ADC,data,u8,255
 P_BACKLIGHT,data,u8,255
 P_TOUCH_CS,data,u8,255
@@ -44,26 +45,5 @@ P_LED_GPIO,data,u8,255
 
 option_space,namespace,,
 O_LCD_TYPE,data,u8,255
-O_LCD_ROTA,data,u8,0
-O_LCD_OUT,data,u32,0
-O_DDMM_FLAG,data,u8,1
 
 custom_ir_space,namespace,,
-K_UP,data,string,0xFE014F 0xFE0150
-K_LEFT,data,string,0xFE0110 0xFE011A
-K_OK,data,string,0xFE0113
-K_RIGHT,data,string,0xFE0116 0xFE0118
-K_DOWN,data,string,0xFE014B 0xFE0151
-K_0,data,string,0xFE0101
-K_1,data,string,0xFE014E
-K_2,data,string,0xFE010D
-K_3,data,string,0xFE010C
-K_4,data,string,0xFE014A
-K_5,data,string,0xFE0109
-K_6,data,string,0xFE0108
-K_7,data,string,0xFE0146
-K_8,data,string,0xFE0105
-K_9,data,string,0xFE0104
-K_STAR,data,string,
-K_DIESE,data,string,
-K_INFO,data,string,0xFE010F

@@ -6,12 +6,13 @@
 #pragma once
 #ifndef __GPIO_H__
 #define __GPIO_H__
+#include <string.h>
 #include "nvs_flash.h"
 #include "driver/spi_master.h"
 #include "esp_adc_cal.h"
 #include "../audio_renderer/audio_renderer.h"
 
-#define GPIO_NONE 255
+#define GPIO_NONE 0xff
 
 //-------------------------------//
 // Define GPIO used in KaRadio32 //
@@ -35,20 +36,21 @@
 // Set the right one with command sys.led
 // GPIO can be changed with command sys.ledgpio("x")
 #define GPIO_LED GPIO_NONE // Flashing led or Playing led
+// TODO: add mode (RGB?)
 
 // gpio of the vs1053
 //-------------------
-#define PIN_NUM_XCS GPIO_NUM_32
-#define PIN_NUM_RST GPIO_NUM_12
-#define PIN_NUM_XDCS GPIO_NUM_33
-#define PIN_NUM_DREQ GPIO_NUM_34
+#define PIN_NUM_XCS GPIO_NONE
+#define PIN_NUM_RST GPIO_NONE
+#define PIN_NUM_XDCS GPIO_NONE
+#define PIN_NUM_DREQ GPIO_NONE
 // + KSPI pins
 
 // Encoder knob
 //-------------
-#define PIN_ENC0_A GPIO_NUM_16  //16	// 255 if encoder not used
-#define PIN_ENC0_B GPIO_NUM_17  //17	// DT
-#define PIN_ENC0_BTN GPIO_NUM_5 //5// SW
+#define PIN_ENC0_A GPIO_NONE  //16	// 255 if encoder not used
+#define PIN_ENC0_B GPIO_NONE  //17	// DT
+#define PIN_ENC0_BTN GPIO_NONE //5// SW
 #define PIN_ENC1_A GPIO_NONE    // 255 if encoder not used
 #define PIN_ENC1_B GPIO_NONE    // DT
 #define PIN_ENC1_BTN GPIO_NONE  // SW
@@ -69,20 +71,20 @@
 
 // I2C lcd (and rda5807 if lcd is i2c or LCD_NONE)
 //------------------------------------------------
-#define PIN_I2C_SCL GPIO_NUM_14
-#define PIN_I2C_SDA GPIO_NUM_13
+#define PIN_I2C_SCL GPIO_NONE
+#define PIN_I2C_SDA GPIO_NONE
 #define PIN_I2C_RST GPIO_NUM_2 // or not used
 
 // SPI lcd
 //---------
-#define PIN_LCD_CS GPIO_NUM_13 //CS
-#define PIN_LCD_A0 GPIO_NUM_14 //A0 or D/C
-#define PIN_LCD_RST GPIO_NUM_2 //Reset RES RST or not used
+#define PIN_LCD_CS GPIO_NONE //CS
+#define PIN_LCD_A0 GPIO_NONE //A0 or D/C
+#define PIN_LCD_RST GPIO_NONE //Reset RES RST or not used
 // KSPI pins +
 
 // IR Signal
 //-----------
-#define PIN_IR_SIGNAL GPIO_NUM_21 // Remote IR source
+#define PIN_IR_SIGNAL GPIO_NONE // Remote IR source
 
 // I2S DAC or PDM output
 //-----------------------
@@ -100,7 +102,7 @@
 #define PIN_TOUCH_CS GPIO_NONE //Chip select T_CS
 
 //esplay
-#define PIN_AUDIO_SHDN GPIO_NUM_4
+#define PIN_AUDIO_SHDN GPIO_NONE
 
 // Sleep Input. https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/system/sleep_modes.html
 //-------------
@@ -119,15 +121,15 @@
 void gpio_output_conf(gpio_num_t gpio);
 
 // get the hardware partition infos
-esp_err_t open_partition(const char *partition_label, const char *namespace, nvs_open_mode open_mode, nvs_handle *handle);
-void close_partition(nvs_handle handle, const char *partition_label);
-void gpio_get_label(char **label);
-void gpio_get_comment(char **label);
+// esp_err_t open_partition(const char *partition_label, const char *namespace, nvs_open_mode open_mode, nvs_handle *handle);
+// void close_partition(nvs_handle handle, const char *partition_label);
+char* gpio_get_label(void);
+char* gpio_get_comment(void);
 void gpio_get_spi_bus(uint8_t *spi_no, gpio_num_t *miso, gpio_num_t *mosi, gpio_num_t *sclk);
 void gpio_get_vs1053(gpio_num_t *xcs, gpio_num_t *rst, gpio_num_t *xdcs, gpio_num_t *dreq);
 void option_get_audio_output(output_mode_t *oom);
-bool option_get_esplay();
-bool option_get_tas5805m();
+bool option_get_esplay(void);
+bool option_get_tas5805m(void);
 void gpio_get_encoders(gpio_num_t *enca, gpio_num_t *encb, gpio_num_t *encbtn, gpio_num_t *enca1, gpio_num_t *encb1, gpio_num_t *encbtn1);
 void gpio_get_active_buttons(bool *abtn0, bool *abtn1);
 void gpio_get_buttons(gpio_num_t *enca, gpio_num_t *encb, gpio_num_t *encc, gpio_num_t *enca1, gpio_num_t *encb1, gpio_num_t *encc1);
@@ -138,7 +140,7 @@ void gpio_get_ir_signal(gpio_num_t *ir);
 void gpio_get_adc(adc1_channel_t *channel, adc1_channel_t *chanbatt);
 void gpio_get_lcd_backlightl(gpio_num_t *lcdb);
 void gpio_get_i2s(gpio_num_t *lrck, gpio_num_t *bclk, gpio_num_t *i2sdata);
-bool gpio_get_ir_key(nvs_handle handle, const char *key, uint32_t *out_value1, uint32_t *out_value2);
+// bool gpio_get_ir_key(nvs_handle handle, const char *key, uint32_t *out_value1, uint32_t *out_value2);
 void gpio_get_touch(gpio_num_t *cs);
 void gpio_get_ledgpio(gpio_num_t *enca);
 void gpio_set_ledgpio(gpio_num_t enca);

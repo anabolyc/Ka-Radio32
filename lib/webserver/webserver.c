@@ -2,7 +2,7 @@
  * Copyright 2016 karawin (http://www.karawin.fr)
 */
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include <string.h>
 #include "interface.h"

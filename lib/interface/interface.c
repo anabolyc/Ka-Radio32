@@ -4,7 +4,7 @@
  *
 *******************************************************************************/
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #define TAG "Interface"
 #include "interface.h"
 #include "stdio.h"
@@ -185,10 +185,12 @@ void setDdmm(uint8_t dm)
 	else
 		ddmm = 1;
 }
+
 uint8_t getRotat()
 {
 	return rotat;
 }
+
 void setRotat(uint8_t dm)
 {
 	if (dm == 0)
@@ -1489,7 +1491,7 @@ void sys_conf()
 {
 	char *label;
 	kprintf("##CONFIG#\n");
-	gpio_get_label(&label);
+	label = gpio_get_label();
 	kprintf("#LABEL: ");
 	if (label != NULL)
 	{
@@ -1498,7 +1500,7 @@ void sys_conf()
 	}
 	else
 		kprintf("no label\n");
-	gpio_get_comment(&label);
+	label = gpio_get_comment();
 
 	kprintf("#COMMENT: ");
 	if (label != NULL)

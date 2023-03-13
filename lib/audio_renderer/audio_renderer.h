@@ -12,10 +12,16 @@
 #include "driver/i2s.h"
 #include "../common/common_component.h"
 
-typedef enum {
-    I2S, I2S_MERUS, DAC_BUILT_IN, PDM, VS1053, SPDIF, BTOOTH
+typedef enum
+{
+    I2S,
+    I2S_MERUS,
+    DAC_BUILT_IN,
+    PDM,
+    VS1053,
+    SPDIF,
+    BTOOTH
 } output_mode_t;
-
 
 typedef struct
 {
@@ -24,13 +30,14 @@ typedef struct
     float sample_rate_modifier;
     i2s_bits_per_sample_t bit_depth;
     i2s_port_t i2s_num;
-	uint32_t volume;
-	uint8_t frame_num;
+    uint32_t volume;
+    uint8_t frame_num;
 } renderer_config_t;
 
 typedef enum
 {
-    PCM_INTERLEAVED, PCM_LEFT_RIGHT
+    PCM_INTERLEAVED,
+    PCM_LEFT_RIGHT
 } pcm_buffer_layout_t;
 
 typedef struct
@@ -40,7 +47,6 @@ typedef struct
     uint8_t num_channels;
     pcm_buffer_layout_t buffer_format;
 } pcm_format_t;
-
 
 /* generic renderer interface */
 void render_samples(char *buf, uint32_t len, pcm_format_t *format);
@@ -56,6 +62,5 @@ void renderer_destroy();
 
 void renderer_zero_dma_buffer();
 renderer_config_t *renderer_get();
-
 
 #endif /* INCLUDE_AUDIO_RENDERER_H_ */

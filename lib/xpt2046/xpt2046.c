@@ -6,7 +6,7 @@
  *  adapted from https://github.com/loboris/ESP32_SPI_MASTER_NODMA_EXAMPLE
  */
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_intr_alloc.h"

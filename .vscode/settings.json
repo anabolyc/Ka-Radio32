@@ -21,7 +21,9 @@
         "spi_master.h": "c",
         "addon.h": "c",
         "ucg.h": "c",
-        "api.h": "c"
+        "api.h": "c",
+        "string": "c",
+        "freertos.h": "c"
     },
     "idf.adapterTargetName": "esp32"
 }

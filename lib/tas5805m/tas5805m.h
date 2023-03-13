@@ -44,7 +44,11 @@ SOFTWARE.
 #define I2C_TAS5806M_MASTER_NUM             I2C_MASTER_NUM      /*!< I2C port number for master dev */
 
 #define TAS5806M_ADDRESS					0x2D				/*!< 7-bit address with a 15k pull up resistor */
+#ifdef CONFIG_P_TAS5805M_PWDN
+#define TAS5806M_GPIO_PDN                   CONFIG_P_TAS5805M_PWDN
+#else
 #define TAS5806M_GPIO_PDN    				5					/*!< GPIO used for !PDN pin */
+#endif
 #define TAS5806M_GPIO_PDN_MASK				((1ULL<<TAS5806M_GPIO_PDN))
 
 #define TAS5806M_RESET_CTRL_REGISTER			0x01
@@ -92,12 +96,12 @@ SOFTWARE.
 #define TAS5806M_MISC_CONTROL_REGISTER			0x76
 #define TAS5806M_FAULT_CLEAR_REGISTER			0x78
 
-esp_err_t tas5806m_unlock();
-esp_err_t tas5806m_init();
+esp_err_t tas5805m_unlock();
+esp_err_t tas5805m_init();
 // esp_err_t i2c_master_init();
-esp_err_t tas5806m_write_byte(uint8_t register_name, uint8_t value);
-esp_err_t tas5806m_read(uint8_t register_name, uint8_t* data_rd, size_t size);
+esp_err_t tas5805m_write_byte(uint8_t register_name, uint8_t value);
+esp_err_t tas5805m_read(uint8_t register_name, uint8_t* data_rd, size_t size);
 
-void tas5806m_task(void *pvParameter);
+void tas5805m_task(void *pvParameter);
 
 #endif

@@ -61,6 +61,7 @@ void i2c_master_init()
     conf.scl_io_num = scl;
     conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
     conf.master.clk_speed = I2C_MASTER_FREQ_HZ;
+    conf.clk_flags = 0;
     esp_err_t res = i2c_param_config(i2c_master_port, &conf);
     printf("Driver param setup : %d\n",res);
 	res = i2c_driver_install(i2c_master_port, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);

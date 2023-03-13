@@ -1,6 +1,6 @@
 /* User application code loading tables for VS10xx */
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #define TAG  "VS1053 Patches"
 #include "vs1053.h"
 #include "stdio.h"

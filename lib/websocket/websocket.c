@@ -5,7 +5,7 @@
 	quick and dirty websocket inplementation for wifi webradio
 	minimal implementaion for short data messages
 */
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <string.h>
 #include "esp_system.h"
 #include "lwip/api.h"

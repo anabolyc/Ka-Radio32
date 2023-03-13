@@ -11,7 +11,7 @@
 #include "audio_player.h"
 #include "spiram_fifo.h"
 #include "freertos/task.h"
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include "esp_system.h"
 #include "esp_log.h"
 
