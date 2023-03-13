@@ -8,7 +8,7 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <string.h>
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"

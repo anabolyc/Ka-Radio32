@@ -18,7 +18,7 @@ Copyright (C) 2017  KaraWin
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -590,8 +590,8 @@ void app_main()
 			g_device->cleared = 0xAABB;	  // marker init done
 			g_device->uartspeed = 115200; // default
 			option_get_audio_output(&(g_device->audio_output_mode));
-			g_device->trace_level = ESP_LOG_DEBUG; //default
-			g_device->vol = 100;				   //default
+			g_device->trace_level = CONFIG_LOG_LEVEL; // default
+			g_device->vol = 100;				  // default
 			g_device->led_gpio = GPIO_NONE;
 			saveDeviceSettings(g_device);
 		}
@@ -656,6 +656,7 @@ void app_main()
 		conf.scl_io_num = scl;
 		conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
 		conf.master.clk_speed = I2C_MASTER_FREQ_HZ;
+		conf.clk_flags = 0;
 		esp_err_t res = i2c_param_config(I2C_MASTER_NUM, &conf);
 		ESP_LOGD(TAG, "I2C setup : %d\n", res);
 		res = i2c_driver_install(I2C_MASTER_NUM, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0);
@@ -678,7 +679,7 @@ void app_main()
 		gpio_num_t sda;
 		gpio_num_t rsti2c;
 		gpio_get_i2c(&scl, &sda, &rsti2c);
-		ESP_LOGD(TAG, "I2C GPIO SDA: %d, SCL: %d", sda, scl);
+		ESP_LOGI(TAG, "I2C GPIO SDA: %d, SCL: %d", sda, scl);
 		i2c_config_t conf;
 		conf.mode = I2C_MODE_MASTER;
 		conf.sda_io_num = sda;
@@ -686,16 +687,17 @@ void app_main()
 		conf.scl_io_num = scl;
 		conf.scl_pullup_en = GPIO_PULLUP_ENABLE;
 		conf.master.clk_speed = I2C_MASTER_FREQ_HZ;
+		conf.clk_flags = 0;
 		// ESP_ERROR_CHECK
 		(i2c_param_config(I2C_MASTER_NUM, &conf));
-		ESP_LOGD(TAG, "i2c_driver_install %d", I2C_MASTER_NUM);
+		ESP_LOGI(TAG, "i2c_driver_install %d", I2C_MASTER_NUM);
 		// ESP_ERROR_CHECK
 		(i2c_driver_install(I2C_MASTER_NUM, conf.mode, I2C_MASTER_RX_BUF_DISABLE, I2C_MASTER_TX_BUF_DISABLE, 0));
 
 		/* init amp */
-		ESP_ERROR_CHECK(tas5806m_init());
+		ESP_ERROR_CHECK(tas5805m_init());
 		/* task for the audio amp */
-		xTaskCreatePinnedToCore(&tas5806m_task, "audioamp_task", 8192, NULL, PRIO_AMP, &pxCreatedTask, CPU_AMP);
+		xTaskCreatePinnedToCore(&tas5805m_task, "audioamp_task", 8192, NULL, PRIO_AMP, &pxCreatedTask, CPU_AMP);
 		ESP_LOGI(TAG, "%s task: %x", "audioamp_task", (unsigned int)pxCreatedTask);
 	}
 	else
@@ -793,6 +795,12 @@ void app_main()
 
 	audio_player_init(player_config);
 	renderer_init(create_renderer_config());
+
+	if (option_get_tas5805m())
+	{
+		/* start amp */
+		ESP_ERROR_CHECK(tas5805m_unlock());
+	}
 
 	// LCD Display infos
 	lcd_welcome(localIp, "STARTED");

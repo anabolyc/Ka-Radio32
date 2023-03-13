@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <math.h>
 #include "freertos/FreeRTOS.h"
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include "esp_log.h"
 #include "soc/rtc.h"
 #include <freertos/task.h>

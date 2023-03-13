@@ -6,7 +6,7 @@
 	minimal implementaion for log and command
 */
 #define TAG "wifi"
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include <string.h>
 #include "freertos/FreeRTOS.h"

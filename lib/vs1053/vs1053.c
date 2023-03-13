@@ -12,7 +12,7 @@
 /** @addtogroup VS1053
  * @{
  */
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #define CHUNK 32
 #include "vs1053.h"
 #include "gpio.h"

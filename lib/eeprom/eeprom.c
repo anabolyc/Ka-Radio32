@@ -4,7 +4,7 @@
  * il ne faut pas decoder KaRadio
  *
 *******************************************************************************/
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_spi_flash.h"
@@ -37,13 +37,13 @@ struct device_settings *g_device;
 
 void partitions_init(void)
 {
-	DEVICE = esp_partition_find_first(0x40, 0, NULL);
+	DEVICE = esp_partition_find_first(0x40, 06, NULL);
 	if (DEVICE == NULL)
 		ESP_LOGE(TAG, "DEVICE Partition not found");
-	DEVICE1 = esp_partition_find_first(0x42, 0, NULL);
+	DEVICE1 = esp_partition_find_first(0x42, 06, NULL);
 	if (DEVICE1 == NULL)
 		ESP_LOGE(TAG, "DEVICE1 Partition not found");
-	STATIONS = esp_partition_find_first(0x41, 0, NULL);
+	STATIONS = esp_partition_find_first(0x41, 06, NULL);
 	if (STATIONS == NULL)
 		ESP_LOGE(TAG, "STATIONS Partition not found");
 	muxDevice = xSemaphoreCreateMutex();

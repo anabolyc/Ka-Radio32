@@ -4,7 +4,7 @@
  *
 *******************************************************************************/
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #define TAG "Interface"
 #include "interface.h"
 #include "stdio.h"

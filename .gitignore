@@ -7,3 +7,4 @@ boards/build
 .vscode/launch.json
 
 sdkconfig.*.old
+sdkconfig.*

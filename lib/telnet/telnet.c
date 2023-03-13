@@ -6,7 +6,7 @@
 	minimal implementaion for log and command
 */
 #define TAG "TELNET"
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 
 #include <stdio.h>
 #include <stdarg.h>

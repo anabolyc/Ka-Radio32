@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include "sdkconfig.h"
 #include "esp_log.h"
 #include "rom/ets_sys.h"

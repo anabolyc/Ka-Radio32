@@ -5,7 +5,7 @@
 // See license.txt for license terms.
 //////////////////////////////////////////////////
 // esp32
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #define TAG "NTP"
 //
 #include <stdio.h>

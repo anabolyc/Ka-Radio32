@@ -4,7 +4,7 @@
  *
 *******************************************************************************/
 
-#define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
+// #define LOG_LOCAL_LEVEL ESP_LOG_VERBOSE
 #include <stddef.h>
 #include <string.h>
 #include <stdio.h>
@@ -1269,26 +1269,190 @@ void initButtonDevices()
 
 void customKeyInit()
 {
-	// TODO: load from biuld config
-	// customKey_t index;
-	// nvs_handle handle;
-	// const char *klab[] = {"K_UP", "K_LEFT", "K_OK", "K_RIGHT", "K_DOWN", "K_0", "K_1", "K_2", "K_3", "K_4", "K_5", "K_6", "K_7", "K_8", "K_9", "K_STAR", "K_DIESE", "K_INFO"};
+	// uint32_t *out_value1 = 0, out_value2 = 0;
+	
+	memset(&customKey, 0, sizeof(uint32_t) * 2 * KEY_MAX); // clear custom
 
-	// memset(&customKey, 0, sizeof(uint32_t) * 2 * KEY_MAX); // clear custom
-	// if (open_partition(hardware, "custom_ir_space", NVS_READONLY, &handle) != ESP_OK)
-	// 	return;
+	#ifdef CONFIG_K_UP
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_UP;
+		char *string = CONFIG_K_UP;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_UP", customKey[index][0], customKey[index][1]);
+	}
+	#endif
 
-	// for (index = KEY_UP; index < KEY_MAX; index++)
-	// {
-	// 	// get the key in the nvs
-	// 	isCustomKey |= gpio_get_ir_key(handle, klab[index], (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
-	// 	ESP_LOGV(TAG, " isCustomKey is %d for %d", isCustomKey, index);
-	// 	taskYIELD();
-	// }
-	// close_partition(handle, hardware);
+    #ifdef CONFIG_K_DOWN
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_DOWN;
+		char *string = CONFIG_K_DOWN;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_DOWN", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_LEFT
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_LEFT;
+		char *string = CONFIG_K_LEFT;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_LEFT", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_RIGHT
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_RIGHT;
+		char *string = CONFIG_K_RIGHT;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_RIGHT", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_OK
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_OK;
+		char *string = CONFIG_K_OK;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_OK", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_0
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_0;
+		char *string = CONFIG_K_0;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_0", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_1
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_1;
+		char *string = CONFIG_K_1;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_1", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_2
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_2;
+		char *string = CONFIG_K_2;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_2", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_3
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_3;
+		char *string = CONFIG_K_3;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_3", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_4
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_4;
+		char *string = CONFIG_K_4;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_4", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_5
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_5;
+		char *string = CONFIG_K_5;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_5", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_6
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_6;
+		char *string = CONFIG_K_6;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_6", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_7
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_7;
+		char *string = CONFIG_K_7;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_7", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_8
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_8;
+		char *string = CONFIG_K_8;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_8", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_9
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_9;
+		char *string = CONFIG_K_9;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_9", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_STAR
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_STAR;
+		char *string = CONFIG_K_STAR;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_STAR", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_DIESE
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_DIESE;
+		char *string = CONFIG_K_DIESE;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_DIESE", customKey[index][0], customKey[index][1]);
+	}
+	#endif
+
+	#ifdef CONFIG_K_INFO
+	{
+		isCustomKey = true;
+		customKey_t index = KEY_INFO;
+		char *string = CONFIG_K_INFO;
+		sscanf(string, "%x %x", (uint32_t *)&(customKey[index][0]), (uint32_t *)&(customKey[index][1]));
+		ESP_LOGI(TAG, "Key: %s, value1: %x, value2: %x", "K_INFO", customKey[index][0], customKey[index][1]);
+	}
+	#endif
 }
-
-// touch loop
 
 void touchLoop()
 {
